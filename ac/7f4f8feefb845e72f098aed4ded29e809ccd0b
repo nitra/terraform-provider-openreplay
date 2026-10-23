@@ -1,0 +1,23 @@
+internal/openreplay/client.go
+  s_aee07b89886068::t_93c93049ecbd2c 18-24,112,130,136,170-190
+internal/openreplay/projects.go
+  s_aee07b89886068::t_05bbe889d6b6f9 1-47
+internal/openreplay/projects_test.go
+  s_aee07b89886068::t_ee350e767e0e76 1-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ac7f4f8feefb845e72f098aed4ded29e809ccd0b",
+  "prompts": {},
+  "sessions": {
+    "s_aee07b89886068": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16722-ef47-7c80-a611-8d368f463789",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "vitaliytv <v@nitra.ai>"
+    }
+  }
+}
