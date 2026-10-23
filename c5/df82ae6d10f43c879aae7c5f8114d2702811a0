@@ -1,0 +1,39 @@
+internal/provider/provider_test.go
+  s_aee07b89886068::t_6c6637641bacff 12,14,51-61
+  s_aee07b89886068::t_f05861485325b5 38,95-96,133-134
+  s_aee07b89886068::t_a06102e31f9ab4 1-11,13,15-37,39-50,62-94,97-132,135-142
+internal/openreplay/client.go
+  s_aee07b89886068::t_01811dc6120d01 131-133
+  s_aee07b89886068::t_fc01704eb88f01 5-7,9-10,60-130,134-161
+  s_aee07b89886068::t_da3c558015324d 1-4,8,11-59,162
+internal/openreplay/client_test.go
+  s_aee07b89886068::t_6ee9441822a04b 1-3,7,9-10,12-65,203
+  s_aee07b89886068::t_d274cf9c50739d 85,96-98,134-137,151-165
+  s_aee07b89886068::t_66afbf26360157 4-6,8,11,66-84,86-95,99-133,138-150,166-202
+internal/provider/provider.go
+  s_aee07b89886068::t_b4d8c16173cc74 50,54-55
+  s_aee07b89886068::t_d274cf9c50739d 57
+  s_aee07b89886068::t_6c6637641bacff 1-49,51-53,56,58-116
+main.go
+  s_aee07b89886068::t_6c6637641bacff 1-27
+go.mod
+  s_aee07b89886068::t_4c85063996ba42 1-35
+go.sum
+  s_aee07b89886068::t_94e365fc5ca79b 1-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c5df82ae6d10f43c879aae7c5f8114d2702811a0",
+  "prompts": {},
+  "sessions": {
+    "s_aee07b89886068": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16722-ef47-7c80-a611-8d368f463789",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "vitaliytv <v@nitra.ai>"
+    }
+  }
+}
