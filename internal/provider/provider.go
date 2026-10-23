@@ -107,7 +107,7 @@ func (p *OpenReplayProvider) Configure(ctx context.Context, request framework.Co
 
 // Resources returns the resource factories supported by this provider.
 func (p *OpenReplayProvider) Resources(context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{NewProjectResource}
 }
 
 // DataSources returns the data source factories supported by this provider.
