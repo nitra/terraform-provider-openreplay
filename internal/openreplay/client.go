@@ -97,7 +97,11 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, output a
 
 	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
-		return c.requestError(method, path, response.StatusCode, "could not read response")
+		message := "could not read response"
+		if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
+			message = "a valid owner/admin dashboard JWT is required"
+		}
+		return classifyAPIError(c.requestError(method, path, response.StatusCode, message), response.StatusCode, nil)
 	}
 	if response.StatusCode == http.StatusNoContent && output == nil && len(responseBody) == 0 {
 		return nil

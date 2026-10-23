@@ -228,6 +228,21 @@ func TestProjectReadPreservesStateForOtherErrors(t *testing.T) {
 	}
 }
 
+func TestProjectReadRemovesStateForTruncatedNotFoundResponse(t *testing.T) {
+	r := configuredProjectResource(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Length", "1000")
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(`{"detail":"private-jwt"}`))
+	})
+	state := projectState(t, int64(42), "old-key", "Production", "web")
+	response := resource.ReadResponse{State: state}
+
+	r.Read(context.Background(), resource.ReadRequest{State: state}, &response)
+
+	require.False(t, response.Diagnostics.HasError(), "%v", response.Diagnostics)
+	require.True(t, response.State.Raw.IsNull(), "HTTP 404 must remove the resource even when its body is truncated")
+}
+
 func TestProjectUpdateStoresServerProject(t *testing.T) {
 	calls := 0
 	r := configuredProjectResource(t, func(w http.ResponseWriter, request *http.Request) {

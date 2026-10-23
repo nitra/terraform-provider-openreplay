@@ -38,7 +38,30 @@ output "project_key" {
 
 For this example, supply the JWT using `TF_VAR_openreplay_token`. Keep credentials out of version control.
 
-Alternatively, omit `endpoint` and `token` from the provider block and set:
+Alternatively, use this complete configuration with environment variables. Replace the configuration above, including its `openreplay_token` variable declaration, so OpenTofu has no unused required input to prompt for:
+
+```hcl
+terraform {
+  required_providers {
+    openreplay = {
+      source = "nitra/openreplay"
+    }
+  }
+}
+
+provider "openreplay" {}
+
+resource "openreplay_project" "web" {
+  name     = "Production"
+  platform = "web"
+}
+
+output "project_key" {
+  value = openreplay_project.web.project_key
+}
+```
+
+Set both values before running OpenTofu:
 
 ```sh
 export OPENREPLAY_ENDPOINT='https://replay.example.com/api'

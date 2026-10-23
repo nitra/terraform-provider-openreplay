@@ -151,6 +151,45 @@ func TestClientDoAllowsNoOutput(t *testing.T) {
 	}
 }
 
+func TestClientDoClassifiesTruncatedResponses(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		status  int
+		kind    error
+		message string
+	}{
+		{"unauthorized", http.StatusUnauthorized, ErrUnauthorized, "owner/admin dashboard JWT"},
+		{"forbidden", http.StatusForbidden, ErrUnauthorized, "owner/admin dashboard JWT"},
+		{"not found", http.StatusNotFound, ErrNotFound, "could not read response"},
+		{"server error", http.StatusInternalServerError, nil, "could not read response"},
+		{"success", http.StatusOK, nil, "could not read response"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Length", "1000")
+				w.WriteHeader(tc.status)
+				_, _ = w.Write([]byte(`{"detail":"private-jwt"}`))
+			}))
+			defer server.Close()
+			client, err := NewClient(server.URL, "private-jwt")
+			require.NoError(t, err)
+
+			err = client.Do(context.Background(), http.MethodGet, "/projects/42", nil, nil)
+			require.Error(t, err)
+			if tc.kind != nil {
+				require.ErrorIs(t, err, tc.kind)
+			} else {
+				require.NotErrorIs(t, err, ErrUnauthorized)
+				require.NotErrorIs(t, err, ErrNotFound)
+			}
+			require.Contains(t, err.Error(), tc.message)
+			require.Contains(t, err.Error(), "GET /projects/42")
+			require.NotContains(t, err.Error(), "private-jwt")
+			require.NotContains(t, err.Error(), "unexpected EOF")
+		})
+	}
+}
+
 func TestClientDoRejectsMissingDataWithoutOutput(t *testing.T) {
 	for _, body := range []string{`{}`, `null`, `{"data":null}`, `{"errors":[]}`} {
 		t.Run(body, func(t *testing.T) {
