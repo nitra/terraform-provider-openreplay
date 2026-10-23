@@ -1,0 +1,33 @@
+.gitignore
+  s_aee07b89886068::t_2ac93b4d1ad41a 3-22
+README.md
+  s_aee07b89886068::t_c57617166ef604 1-97
+docs/index.md
+  s_aee07b89886068::t_13d6206d1dd0af 1-57
+docs/resources/project.md
+  s_aee07b89886068::t_eb363268a02c05 1-45
+examples/provider/provider.tf
+  s_aee07b89886068::t_43b2deb1d22283 1-18
+examples/resources/openreplay_project/import.sh
+  s_aee07b89886068::t_6aace28ea1a3fd 1-4
+examples/resources/openreplay_project/resource.tf
+  s_aee07b89886068::t_763be618c8f1b9 1-9
+terraform-registry-manifest.json
+  s_aee07b89886068::t_63681ba913f0d1 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cc2e9606fa163427ee03529ff3eab218e7fccf0d",
+  "prompts": {},
+  "sessions": {
+    "s_aee07b89886068": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16722-ef47-7c80-a611-8d368f463789",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "vitaliytv <v@nitra.ai>"
+    }
+  }
+}
