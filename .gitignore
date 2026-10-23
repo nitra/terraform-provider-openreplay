@@ -1,2 +1,22 @@
 .worktrees/
 .superpowers/
+
+# Go build and test artifacts
+/bin/
+/terraform-provider-openreplay
+*.test
+*.out
+/coverage/
+
+# Local OpenTofu/Terraform working files and credentials
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+.terraformrc
+.tofurc
+terraform.rc
