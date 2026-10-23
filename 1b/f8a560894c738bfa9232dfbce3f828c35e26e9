@@ -1,0 +1,27 @@
+internal/provider/project_resource.go
+  s_aee07b89886068::t_3a0b5bfabee52b 5-6,9,13,19,26-32,83-97,100-116,119-135,138-169
+  s_aee07b89886068::t_edb2c59ca6d504 14,18,22-24,66-77,79
+  s_aee07b89886068::t_40c95023b0533e 1-4,7-8,10-12,15-17,20-21,25,33-65,78,80-82,98-99,117-118,136-137
+internal/provider/provider.go
+  s_aee07b89886068::t_40c95023b0533e 110
+internal/provider/project_resource_test.go
+  s_aee07b89886068::t_c787135ca92eae 5-7,10,15,17-19,85-337
+  s_aee07b89886068::t_434cca0d0ec13f 65-84,338
+  s_aee07b89886068::t_a3df4ed2784956 1-4,8-9,11-14,16,20-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1bf8a560894c738bfa9232dfbce3f828c35e26e9",
+  "prompts": {},
+  "sessions": {
+    "s_aee07b89886068": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16722-ef47-7c80-a611-8d368f463789",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "vitaliytv <v@nitra.ai>"
+    }
+  }
+}
