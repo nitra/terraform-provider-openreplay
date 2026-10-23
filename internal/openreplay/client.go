@@ -15,6 +15,13 @@ import (
 	"unicode"
 )
 
+var (
+	// ErrNotFound indicates that the dashboard project does not exist.
+	ErrNotFound = errors.New("OpenReplay project not found")
+	// ErrUnauthorized indicates that an owner/admin dashboard JWT is required.
+	ErrUnauthorized = errors.New("OpenReplay authorization failed")
+)
+
 // Client communicates with a single OpenReplay dashboard API.
 type Client struct {
 	endpoint url.URL
@@ -102,8 +109,8 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, output a
 	}
 	decodeErr := json.Unmarshal(responseBody, &envelope)
 	message := ""
+	var messages []string
 	if len(envelope.Errors) > 0 && string(envelope.Errors) != "null" {
-		var messages []string
 		if err := json.Unmarshal(envelope.Errors, &messages); err != nil {
 			message = "API returned errors"
 		} else if len(messages) > 0 {
@@ -120,13 +127,13 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, output a
 		if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
 			message = "a valid owner/admin dashboard JWT is required"
 		}
-		return c.requestError(method, path, response.StatusCode, message)
+		return classifyAPIError(c.requestError(method, path, response.StatusCode, message), response.StatusCode, messages)
 	}
 	if decodeErr != nil {
 		return c.requestError(method, path, response.StatusCode, "invalid JSON response")
 	}
 	if message != "" {
-		return c.requestError(method, path, response.StatusCode, message)
+		return classifyAPIError(c.requestError(method, path, response.StatusCode, message), response.StatusCode, messages)
 	}
 	if len(envelope.Data) == 0 || string(envelope.Data) == "null" {
 		return c.requestError(method, path, response.StatusCode, "response is missing data")
@@ -159,4 +166,25 @@ func (c *Client) requestError(method, path string, status int, message string) e
 		detail = detail[:1024] + "..."
 	}
 	return errors.New(detail)
+}
+
+// classifyAPIError preserves sanitized diagnostics while exposing stable error kinds.
+func classifyAPIError(err error, status int, messages []string) error {
+	if status == http.StatusUnauthorized || status == http.StatusForbidden {
+		return fmt.Errorf("%w: %v", ErrUnauthorized, err)
+	}
+	for _, message := range messages {
+		if message == "unauthorized" {
+			return fmt.Errorf("%w: %v", ErrUnauthorized, err)
+		}
+	}
+	if status == http.StatusNotFound {
+		return fmt.Errorf("%w: %v", ErrNotFound, err)
+	}
+	for _, message := range messages {
+		if message == "project not found" {
+			return fmt.Errorf("%w: %v", ErrNotFound, err)
+		}
+	}
+	return err
 }
