@@ -1,0 +1,20 @@
+docs/superpowers/specs/2026-10-23-openreplay-project-provider-design.md
+  s_aee07b89886068::t_903dee4e8c1e8e 27-28
+  s_aee07b89886068::t_286f1803dfd53a 1-26,29-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2db832cd09d5346313824e79abce11f1193614e9",
+  "prompts": {},
+  "sessions": {
+    "s_aee07b89886068": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16722-ef47-7c80-a611-8d368f463789",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "vitaliytv <v@nitra.ai>"
+    }
+  }
+}
