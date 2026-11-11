@@ -24,9 +24,10 @@ var (
 
 // Client communicates with a single OpenReplay dashboard API.
 type Client struct {
-	endpoint url.URL
-	token    string
-	http     *http.Client
+	endpoint    url.URL
+	token       string
+	http        *http.Client
+	projectPath string
 }
 
 // NewClient validates the endpoint and token without contacting the server.
@@ -47,8 +48,9 @@ func NewClient(endpoint, token string) (*Client, error) {
 	}
 	base.Path = "/api"
 	return &Client{
-		endpoint: *base,
-		token:    token,
+		endpoint:    *base,
+		token:       token,
+		projectPath: "/projects",
 		http: &http.Client{
 			Timeout: 30 * time.Second,
 			CheckRedirect: func(*http.Request, []*http.Request) error {
@@ -57,6 +59,9 @@ func NewClient(endpoint, token string) (*Client, error) {
 		},
 	}, nil
 }
+
+// UseMachineProjects switches only project requests to the machine API.
+func (c *Client) UseMachineProjects() { c.projectPath = "/automation/projects" }
 
 // URL appends a dashboard path without discarding the endpoint's /api prefix.
 // It returns an independent URL that callers may safely modify.
@@ -100,6 +105,12 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, output a
 		message := "could not read response"
 		if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
 			message = "a valid owner/admin dashboard JWT is required"
+			if c.projectPath == "/automation/projects" {
+				message = "a valid authorized machine OIDC token is required"
+			}
+		}
+		if c.projectPath == "/automation/projects" && response.StatusCode == http.StatusNotFound {
+			return c.requestError(method, path, response.StatusCode, message)
 		}
 		return classifyAPIError(c.requestError(method, path, response.StatusCode, message), response.StatusCode, nil)
 	}
@@ -130,6 +141,14 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, output a
 		}
 		if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
 			message = "a valid owner/admin dashboard JWT is required"
+			if c.projectPath == "/automation/projects" {
+				message = "a valid authorized machine OIDC token is required"
+			}
+		}
+		// A missing machine endpoint (for example an older server or wrong route)
+		// must not be interpreted as a missing project and removed from state.
+		if c.projectPath == "/automation/projects" && response.StatusCode == http.StatusNotFound && message != "project not found" {
+			return c.requestError(method, path, response.StatusCode, "machine API route unavailable or unexpected not-found response")
 		}
 		return classifyAPIError(c.requestError(method, path, response.StatusCode, message), response.StatusCode, messages)
 	}

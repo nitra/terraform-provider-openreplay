@@ -141,7 +141,7 @@ func (r *ProjectResource) Delete(ctx context.Context, request resource.DeleteReq
 	if response.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteProject(ctx, id.ValueInt64()); err != nil {
+	if err := r.client.DeleteProject(ctx, id.ValueInt64()); err != nil && !errors.Is(err, openreplay.ErrNotFound) {
 		response.Diagnostics.AddError("Unable to Delete OpenReplay Project", err.Error())
 		return
 	}

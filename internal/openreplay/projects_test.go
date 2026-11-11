@@ -12,6 +12,31 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestMachineProjectPaths(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/api/automation/projects/42", r.URL.Path)
+		_, _ = io.WriteString(w, `{"data":{"projectId":42,"projectKey":"key","name":"name","platform":"web"}}`)
+	}))
+	defer server.Close()
+	client, err := NewClient(server.URL, "jwt")
+	require.NoError(t, err)
+	client.UseMachineProjects()
+	_, err = client.GetProject(context.Background(), 42)
+	require.NoError(t, err)
+	require.NoError(t, client.DeleteProject(context.Background(), 42))
+}
+
+func TestMachineMissingRouteIsNotMissingProject(t *testing.T) {
+	server := httptest.NewServer(http.NotFoundHandler())
+	defer server.Close()
+	client, err := NewClient(server.URL, "jwt")
+	require.NoError(t, err)
+	client.UseMachineProjects()
+	_, err = client.GetProject(context.Background(), 42)
+	require.Error(t, err)
+	require.NotErrorIs(t, err, ErrNotFound)
+}
+
 func TestCreateProjectSendsDashboardContract(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)

@@ -1,5 +1,16 @@
 # OpenReplay provider for OpenTofu
 
+## Machine OIDC (unreleased)
+
+Set `auth_mode = "machine"` (or `OPENREPLAY_AUTH_MODE=machine`) to use the
+OpenReplay machine projects API at `/api/automation/projects`. Supply the
+short-lived Forgejo Actions OIDC token via `OPENREPLAY_TOKEN`. The server must
+be configured to trust the exact issuer, audience, repository, ref and plan or
+apply workflow. Plan identities have read-only access; apply identities can
+create, update and delete. The existing dashboard mode remains the default.
+The machine API and this provider change have not yet been released or tested
+against a live OpenReplay instance.
+
 Manage self-hosted OpenReplay projects with the `nitra/openreplay` provider. The `openreplay_project` resource creates and updates projects through the dashboard API and returns the `project_key` used by the OpenReplay tracker.
 
 ## Configure a project

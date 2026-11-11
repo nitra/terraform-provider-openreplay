@@ -33,10 +33,11 @@ func configureProvider(t *testing.T, endpoint, token any) framework.ConfigureRes
 	config := tfsdk.Config{
 		Schema: providerSchema(t),
 		Raw: tftypes.NewValue(tftypes.Object{AttributeTypes: map[string]tftypes.Type{
-			"endpoint": tftypes.String, "token": tftypes.String,
+			"endpoint": tftypes.String, "token": tftypes.String, "auth_mode": tftypes.String,
 		}}, map[string]tftypes.Value{
-			"endpoint": tftypes.NewValue(tftypes.String, endpoint),
-			"token":    tftypes.NewValue(tftypes.String, token),
+			"endpoint":  tftypes.NewValue(tftypes.String, endpoint),
+			"token":     tftypes.NewValue(tftypes.String, token),
+			"auth_mode": tftypes.NewValue(tftypes.String, nil),
 		}),
 	}
 	var response framework.ConfigureResponse
@@ -89,6 +90,22 @@ func TestProviderConfiguresFromEnvironment(t *testing.T) {
 			require.NoError(t, client.Do(context.Background(), http.MethodGet, "/projects", nil, nil))
 		})
 	}
+}
+
+func TestProviderMachineModeFromEnvironment(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/api/automation/projects/42", r.URL.Path)
+		_, _ = w.Write([]byte(`{"data":{"projectId":42,"projectKey":"key","name":"name","platform":"web"}}`))
+	}))
+	defer server.Close()
+	t.Setenv("OPENREPLAY_ENDPOINT", server.URL)
+	t.Setenv("OPENREPLAY_TOKEN", "machine-jwt")
+	t.Setenv("OPENREPLAY_AUTH_MODE", "machine")
+	response := configureProvider(t, nil, nil)
+	require.False(t, response.Diagnostics.HasError(), "%v", response.Diagnostics)
+	client := response.ResourceData.(*openreplay.Client)
+	_, err := client.GetProject(context.Background(), 42)
+	require.NoError(t, err)
 }
 
 func TestProviderRejectsMissingInvalidAndUnknownConfiguration(t *testing.T) {
