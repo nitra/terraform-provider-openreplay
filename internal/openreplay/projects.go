@@ -23,25 +23,25 @@ type Project struct {
 // CreateProject creates a project using an owner/admin dashboard JWT.
 func (c *Client) CreateProject(ctx context.Context, input ProjectInput) (Project, error) {
 	var project Project
-	err := c.Do(ctx, http.MethodPost, "/projects", input, &project)
+	err := c.Do(ctx, http.MethodPost, c.projectPath, input, &project)
 	return project, err
 }
 
 // GetProject reads a project by its numeric dashboard ID.
 func (c *Client) GetProject(ctx context.Context, id int64) (Project, error) {
 	var project Project
-	err := c.Do(ctx, http.MethodGet, fmt.Sprintf("/projects/%d", id), nil, &project)
+	err := c.Do(ctx, http.MethodGet, fmt.Sprintf("%s/%d", c.projectPath, id), nil, &project)
 	return project, err
 }
 
 // UpdateProject updates a project's name and platform.
 func (c *Client) UpdateProject(ctx context.Context, id int64, input ProjectInput) (Project, error) {
 	var project Project
-	err := c.Do(ctx, http.MethodPut, fmt.Sprintf("/projects/%d", id), input, &project)
+	err := c.Do(ctx, http.MethodPut, fmt.Sprintf("%s/%d", c.projectPath, id), input, &project)
 	return project, err
 }
 
 // DeleteProject removes a project by its numeric dashboard ID.
 func (c *Client) DeleteProject(ctx context.Context, id int64) error {
-	return c.Do(ctx, http.MethodDelete, fmt.Sprintf("/projects/%d", id), nil, nil)
+	return c.Do(ctx, http.MethodDelete, fmt.Sprintf("%s/%d", c.projectPath, id), nil, nil)
 }

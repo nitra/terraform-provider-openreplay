@@ -26,6 +26,7 @@ type OpenReplayProvider struct {
 type providerModel struct {
 	Endpoint types.String `tfsdk:"endpoint"`
 	Token    types.String `tfsdk:"token"`
+	AuthMode types.String `tfsdk:"auth_mode"`
 }
 
 // New returns a provider factory with the supplied build version.
@@ -46,6 +47,11 @@ func (p *OpenReplayProvider) Schema(_ context.Context, _ framework.SchemaRequest
 	response.Schema = schema.Schema{
 		Description: "Manage projects through the authenticated OpenReplay dashboard API.",
 		Attributes: map[string]schema.Attribute{
+			"auth_mode": schema.StringAttribute{
+				Optional:    true,
+				Description: "dashboard (default) or machine OIDC. Also accepts OPENREPLAY_AUTH_MODE.",
+				Validators:  []validator.String{stringvalidator.OneOf("dashboard", "machine")},
+			},
 			"endpoint": schema.StringAttribute{
 				Optional:    true,
 				Description: "Absolute HTTP(S) dashboard API URL ending in /api. Defaults to OPENREPLAY_ENDPOINT.",
@@ -53,7 +59,7 @@ func (p *OpenReplayProvider) Schema(_ context.Context, _ framework.SchemaRequest
 			"token": schema.StringAttribute{
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Owner/admin dashboard JWT. Defaults to OPENREPLAY_TOKEN.",
+				Description: "Dashboard JWT or machine OIDC token according to auth_mode. Defaults to OPENREPLAY_TOKEN.",
 				Validators:  []validator.String{stringvalidator.LengthAtLeast(1)},
 			},
 		},
@@ -71,9 +77,23 @@ func (p *OpenReplayProvider) Configure(ctx context.Context, request framework.Co
 		response.Diagnostics.AddAttributeError(path.Root("endpoint"), "Unknown OpenReplay Endpoint", "The endpoint must be known before configuring the provider.")
 	}
 	if config.Token.IsUnknown() {
-		response.Diagnostics.AddAttributeError(path.Root("token"), "Unknown OpenReplay Token", "The dashboard JWT must be known before configuring the provider.")
+		response.Diagnostics.AddAttributeError(path.Root("token"), "Unknown OpenReplay Token", "The token must be known before configuring the provider.")
+	}
+	if config.AuthMode.IsUnknown() {
+		response.Diagnostics.AddAttributeError(path.Root("auth_mode"), "Unknown OpenReplay Auth Mode", "The auth mode must be known before configuring the provider.")
 	}
 	if response.Diagnostics.HasError() {
+		return
+	}
+	mode := config.AuthMode.ValueString()
+	if config.AuthMode.IsNull() {
+		mode = os.Getenv("OPENREPLAY_AUTH_MODE")
+	}
+	if mode == "" {
+		mode = "dashboard"
+	}
+	if mode != "dashboard" && mode != "machine" {
+		response.Diagnostics.AddAttributeError(path.Root("auth_mode"), "Invalid OpenReplay Auth Mode", "Use dashboard or machine.")
 		return
 	}
 
@@ -91,7 +111,7 @@ func (p *OpenReplayProvider) Configure(ctx context.Context, request framework.Co
 		response.Diagnostics.AddAttributeError(path.Root("endpoint"), "Missing OpenReplay Endpoint", "Set endpoint in the provider configuration or OPENREPLAY_ENDPOINT in the environment.")
 	}
 	if token == "" {
-		response.Diagnostics.AddAttributeError(path.Root("token"), "Missing OpenReplay Token", "Set token to an owner/admin dashboard JWT or set OPENREPLAY_TOKEN in the environment.")
+		response.Diagnostics.AddAttributeError(path.Root("token"), "Missing OpenReplay Token", "Set token or OPENREPLAY_TOKEN in the environment.")
 	}
 	if response.Diagnostics.HasError() {
 		return
@@ -100,6 +120,9 @@ func (p *OpenReplayProvider) Configure(ctx context.Context, request framework.Co
 	if err != nil {
 		response.Diagnostics.AddError("Invalid OpenReplay Configuration", err.Error())
 		return
+	}
+	if mode == "machine" {
+		client.UseMachineProjects()
 	}
 	response.ResourceData = client
 	response.DataSourceData = client
